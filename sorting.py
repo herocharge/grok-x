@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 # %matplotlib inline
 import plotly.express as px
 import plotly.io as pio
+import wandb.integration
 pio.renderers.default = "colab"
 import plotly.graph_objects as go
 
@@ -43,17 +44,17 @@ import gc
 
 # import comet_ml
 import itertools
+import wandb
 
 
-
-use_drive = True
+use_drive = False
 
 
 
 if use_drive:
     drive.mount('/content/gdrive')
     drive_root = Path('/content/gdrive/MyDrive/Colab Notebooks/Sort/')
-root = Path('./Grokking/saved_runs')
+root = Path('/scratch/kyrylo/Grokking/saved_runs')
 large_root = Path('./Grokking/large_files')
 
 # A helper class to get access to intermediate activations (inspired by Garcon)
@@ -376,7 +377,24 @@ random_answers = np.random.randint(low=0, high=p, size=(p, p))
 fns_dict = {'add': lambda x,y:(x+y)%p, 'subtract': lambda x,y:(x-y)%p, 'x2xyy2':lambda x,y:(x**2+x*y+y**2)%p, 'rand':lambda x,y:random_answers[x][y]}
 fn = fns_dict[fn_name]
 
+
+config = {
+    'lr':lr,
+    'weight_decay':weight_decay,
+    'fn_name': fn_name,
+    'dataset_size':dataset_size,
+    'frac_train':frac_train,
+    'num_epochs':num_epochs,
+    'num_layers':num_layers,
+    'operation':'sort'
+}
+
+
 train_model = True #@param
+
+
+wandb.login(key='c85c2ca4b05cbf60cbd4154f1c420aae8dce9c68')
+wandb.init(config=config, name=f'{config["operation"]}_{int(time.time())}')
 
 def gen_train_test(frac_train, dataset_size, arr_len=5, start=1, end=100, seed=0):
     # Generate train and test split
@@ -425,7 +443,19 @@ if train_model:
         train_accs.append(train_acc.item())
         test_exact_accs.append(test_exact_acc.item())
         train_exact_accs.append(train_exact_acc.item())
+
+
+        
+  
         if epoch%100 == 0:
+          wandb.log({
+            'Train loss': train_loss.item(),
+            'Test loss': test_loss.item(),
+            'Test acc': test_acc.item(),
+            'Train acc': train_acc.item(),
+            'Test exact acc': test_exact_acc.item(),
+            'Train exact acc': train_exact_acc.item(),
+            })
           print(f"{epoch}_ \
             {np.log(train_loss.item()):.4f}_{np.log(test_loss.item()):.4f}\
             {train_acc.item():.4f}_{test_acc.item():.4f}\
