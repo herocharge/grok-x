@@ -359,10 +359,12 @@ stopping_thresh = -1 #@param
 seed = 0 #@param
 
 arr_len = 5 #@param
+
 start = 1 #@param
 end = 100 #@param
 
-num_layers = 5
+num_layers = 1
+
 batch_style = 'full'
 d_vocab = p+1
 n_ctx = 3
@@ -386,7 +388,8 @@ config = {
     'frac_train':frac_train,
     'num_epochs':num_epochs,
     'num_layers':num_layers,
-    'operation':'sort'
+    'arr_len':arr_len,
+    'operation':'median'
 }
 
 
@@ -398,12 +401,19 @@ wandb.init(config=config, name=f'{config["operation"]}_{int(time.time())}')
 
 def gen_train_test(frac_train, dataset_size, arr_len=5, start=1, end=100, seed=0):
     # Generate train and test split
+    
+    
     arrs = [np.random.randint(start, end+1, size=arr_len) for _ in range(dataset_size)]
-    pairs = [np.concatenate([x, [0], np.sort(x)]) for x in arrs]
-    random.seed(seed)
+    pairs = [np.concatenate([x, [0], [np.sort(x)[2]]]) for x in arrs]
     random.shuffle(pairs)
     div = int(frac_train*len(pairs))
     return np.array(pairs[:div]), np.array(pairs[div:])
+
+random.seed(seed)
+np.random.seed(seed)
+torch.random.manual_seed(seed)
+torch.cuda.random.manual_seed(seed)
+
 
 train, test = gen_train_test(
                     frac_train,
