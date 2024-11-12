@@ -54,7 +54,7 @@ use_drive = False
 if use_drive:
     drive.mount('/content/gdrive')
     drive_root = Path('/content/gdrive/MyDrive/Colab Notebooks/Sort/')
-root = Path('/scratch/kyrylo/Grokking/saved_runs')
+root = Path('/scratch/herocharge/Grokking/saved_runs')
 large_root = Path('./Grokking/large_files')
 
 # A helper class to get access to intermediate activations (inspired by Garcon)
@@ -350,7 +350,7 @@ p=113 #@param
 d_model = 128 #@param
 fn_name = 'add' #@param ['add', 'subtract', 'x2xyy2','rand']
 frac_train = 0.3 #@param
-dataset_size = 10000 #@param
+dataset_size = 1000 #@param
 num_epochs = 20000 #@param
 save_models = True #@param
 save_every = 1000 #@param
@@ -358,11 +358,11 @@ save_every = 1000 #@param
 stopping_thresh = -1 #@param
 seed = 0 #@param
 
-arr_len = 5 #@param
+arr_len = 3 #@param
 start = 1 #@param
-end = 100 #@param
+end = 10 #@param
 
-num_layers = 5
+num_layers = 1
 batch_style = 'full'
 d_vocab = p+1
 n_ctx = 3
@@ -385,6 +385,7 @@ config = {
     'dataset_size':dataset_size,
     'frac_train':frac_train,
     'num_epochs':num_epochs,
+    'arr_len': arr_len,
     'num_layers':num_layers,
     'operation':'sort'
 }
