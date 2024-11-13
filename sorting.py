@@ -367,7 +367,7 @@ batch_style = 'full'
 d_vocab = p+1
 n_ctx = 3
 d_mlp = 4*d_model
-num_heads = 4
+num_heads = 1
 assert d_model % num_heads == 0
 d_head = d_model//num_heads
 act_type = 'ReLU' #@param ['ReLU', 'GeLU']
@@ -394,17 +394,25 @@ config = {
 train_model = True #@param
 
 
-wandb.login(key='c85c2ca4b05cbf60cbd4154f1c420aae8dce9c68')
-wandb.init(config=config, name=f'{config["operation"]}_{int(time.time())}')
+# wandb.login(key='c85c2ca4b05cbf60cbd4154f1c420aae8dce9c68')
+wandb.init(project='grok-x', config=config, name=f'{config["operation"]}_{int(time.time())}')
 
 def gen_train_test(frac_train, dataset_size, arr_len=5, start=1, end=100, seed=0):
     # Generate train and test split
+    
+    
     arrs = [np.random.randint(start, end+1, size=arr_len) for _ in range(dataset_size)]
     pairs = [np.concatenate([x, [0], np.sort(x)]) for x in arrs]
     random.seed(seed)
     random.shuffle(pairs)
     div = int(frac_train*len(pairs))
     return np.array(pairs[:div]), np.array(pairs[div:])
+
+random.seed(seed)
+np.random.seed(seed)
+torch.random.manual_seed(seed)
+torch.cuda.random.manual_seed(seed)
+
 
 train, test = gen_train_test(
                     frac_train,
