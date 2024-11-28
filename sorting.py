@@ -394,7 +394,7 @@ config = {
 train_model = True #@param
 
 
-# wandb.login(key='c85c2ca4b05cbf60cbd4154f1c420aae8dce9c68')
+
 wandb.init(project='grok-x', config=config, name=f'{config["operation"]}_{int(time.time())}')
 
 def gen_train_test(frac_train, dataset_size, arr_len=5, start=1, end=100, seed=0):
