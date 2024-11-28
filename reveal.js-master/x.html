@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Circuit Engineering</title>
+
+    <link rel="stylesheet" href="dist/reset.css">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/blood.css" id="theme">
+    <link rel="stylesheet" href="plugin/highlight/monokai.css">
+    <style>
+        img { max-width: 70%; height: auto; }
+        .equation { font-size: 0.8em; }
+        section { text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <section><h2>Grokking models to learn algorithms</h2><p>Team: p̶r̶o̶m̶p̶t̶  &nbsp; circuit engineers</p></section>
+            <section><h2>Authors</h2><ul><li>Kyrylo Shyvam Kumar (2021101080)</li><li>Bhargav Srinivas (2021101065)</li><li>Vansh Garg (2021111006)</li></ul></section>
+            <section><h2>Our Inspiration</h2><img src="paper.png"></img></section>
+            <section><h3>Interpreting Addition</h3><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image.png" alt="Losses"></section>
+                  
+
+
+    
+            <section><h3>Analysis in paper</h3><b>Closeness of positional encodings:</b> <ul><li>The cosine similarity shows some closeness in positional encodings.</li>
+                <li>Any possible difference is eliminated at the MLP (after attention block). So final prediction is position invariant to inputs.</li>
+                 <img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%201.png" alt="Positional Encodings"></section>
+            </ul>
+                <section><h3>Analysis in paper</h3>
+                    <p>CLS token pays equal attention to both of the positions (attention ~ 0.5). </p>
+                <img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image 2.png" alt="attention"></section>
+
+
+            <!-- <section><h2>Problem Statement</h2><ul><li>Train transformers for algorithmic tasks (modular addition, maximum, median, sorting) and interpret them.  Focus on "grokking" – generalization after overfitting.</li><li>Dataset: 5,000 pairs of numbers for modular addition, sets of 5 for other operations.</li><li>Model: Single-layer decoder transformer.</li></ul></section>
+            <section><h2>Related Works</h2></section>
+            <section><h3>Grokking</h3><p>[1] reported grokking: validation accuracy increases sharply after overfitting on small algorithmic datasets.</p></section>
+            <section><h3>Interpreting Grokking</h3><p>Initially thought to be "SGD random walk" [6], but [2] showed continuous progress and reverse-engineered the algorithm.</p></section>
+            <section><h3>Non-Transformer Models</h3><p>[2] uses a 1L transformer.  [4] does similar analysis on MLPs.</p></section> -->
+
+                      
+            
+            <!-- <section><ul><li><strong>Attention:</strong> CLS attends equally to both input positions.</li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%202.png" alt="Attention"></section> -->
+            <section><ul><li> Periodic patterns in attention score</li></ul> <iframe src="plot1.html" width="100%" height="500"></iframe></section>
+            <section><ul><li><strong>Periodicty in activations of FFN:</strong>.</li></ul><iframe src="plot2.html" width="100%" height="500"></iframe></section>
+
+            <!-- <section><ul><li><strong>Attention in Fourier Basis:</strong> Specific frequencies emerge.</li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%205.png" alt="Fourier Attention"></section>
+            <section><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%206.png" alt="Fourier Attention 2"></section>
+            <section><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%207.png" alt="Fourier Attention 3"></section>
+            <section><ul><li><strong>MLP Activations (Fourier):</strong> Different frequency patterns.</li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%208.png" alt="MLP Activations"></section> -->
+            
+            
+            <section><ul><li><strong>Fourier decomposition of embeddings: </strong>Periodicity in activations implies that there are few important frequencies, and we can perform Fourier decomposition to get them. Also activations will be sparse in Fourier basis.</li>
+                <img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%209.png" alt="Embeddings" height="50%" width="70%"></section></ul>
+            
+                <section><ul><li><strong>Actual algorithm learnt:</strong> </li></ul> <iframe src="algo.png" width="100%" height="500"></iframe></section>
+            <section><h3>What's next?</h3><ul><li>We have replictated paper's results.</li><li>And decided to generalize this to other algorithms like sorting.</li>
+            <li>However sorting algorithm is non-trivial and have chosen easier tasks on the wau to solve it.</li></ul></section>
+
+            <section><h4>Grokking Challenges</h4><strong>Task Complexity:</strong><ul>
+                <li>Max of 5 numbers involves output consisting of any 5 inputs. So model needs only to learn copying of information properly.</li>
+                <li>Sorting is a complicated task. Despite it requiring copying of information, the algorithm itself is non-trivial.</li>
+                <li> Max generalizes before overfitting and grokking.</li>
+                <li> Sorting never reaches perfect accuracy. Can be mitigated with bigger datasets.</li>
+                </ul></section>
+                
+                <section><ul>
+                    <li><strong>Data Distribution:</strong> Addition with modulo is defined over cyclic group, leading to uniform distribution of output in general. 
+                      <li>  Operations like max/median output <b>biased distribution</b> for random input. Bigger numbers have a higher probability to occur in output. So, there existed some outputs for which no backpropagation happened. 
+                      </li><li>  We had to augment dataset with samples which had all numbers small and thus had max < 20. </li></ul></section>
+            <section><h3>General Observations</h3><ul><li><strong>Sorting outperforms Median:</strong> sorting actually predicts five numbers, which acts as extra training signal (or CoT) helping model to train.
+            </li>
+                <li><strong>Internal Dimensionality of Task:</strong> Median benefits from larger dimensions (dim=512), while addition from smaller.</li>
+                <!-- <li>Adding Special dataset with edge cases missed in the training data, helps only marginally</li></ul> -->
+                <img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2010.png" alt="Dimensionality" width="40%">
+            </ul></section>
+
+            <section><h3>Max Transformer</h3><ul>  
+                <strong>Problem set up:</strong>
+                
+                <li>Decoder Transformer Model is given 5 numbers, and is predicting next token. </li>
+                <li>Numbers are in range of 1-100.</li>
+                <li><strong>Training Loss:</strong></li><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2011.png" alt="Max Loss" width="50%"></ul>
+                
+                </section>
+            <section><ul><li><strong>Position Embeddings:</strong> 
+                Similar across permutations, perpendicular to CLS. Demonstrates positional independence.</li></ul>
+                <iframe src="plots_html/max_pos_em_cos_sim.html" alt="Max Position Embeddings" height="400" width="800"></iframe></section>
+            <section><ul><li><strong>Activations (Permutations):</strong>  Highly similar, showing positional invariance.</li></ul>
+                <iframe src="plots_html/max_neuron_cos_sim_perm_inv.html" alt="Max Position Embeddings" height="400" width="800"></iframe></section>
+            <section><ul><li><strong>CLS Attention:</strong> Focuses on the maximum element, regardless of position.  Suggests Q-K circuit finds the max position, OV circuit convert position to value.</li></ul>
+                <iframe src="plots_html/max_attn_all_positions_all_permutations.html" alt="Max Position Embeddings" height="400" width="800"></iframe></section>
+            <section>
+                <h4>Circuit Analysis: the attention values</h4>
+                <ul><li>Elements closer to diagonal have smaller absolute difference and evaluate to smaller attention. </li></ul>
+                <iframe src="plots_html/max_q_times_k_values.html" alt="Max Position Embeddings" height="400" width="800"></iframe>
+                </section>
+
+
+            <!-- <section><h3>Circuit Analysis (Max)</h3><ul><li><strong>Attention Scores:</strong> Lower for closer elements.</li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2016.png" alt="Attention Scores"></section> -->
+            <section><ul><li><strong>Head Dimensions vs. Input:</strong>  We plot all 32 dimensions of a single head, and specifically how it (value in ith dimension) varies with input. </li></ul>
+                <iframe src="plots_html/max_q_lines.html" alt="Max Position Embeddings" height="400" width="800"></iframe></section>
+            <section><ul><li><strong>Key Vectors:</strong>  Dimensions highly correlated, resembling straight lines.  QK circuit might be representable as a linear equation.</li></ul>
+                <iframe src="plots_html/max_k_lines.html" alt="Max Position Embeddings" height="400" width="800"></iframe></section>
+
+            <section><ul><li><strong>Linear Regression of Neurons:</strong>  Replacing neurons with y = mx + c (via linear regression) reveals attention patterns.</li></ul>
+            <li><strong>For a neuron:   </strong> y = -0.012x + 0.7</li>
+            <p>Unnormalized attention: <br/> a = <span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∑</mo><mo stretchy="false">(</mo><mi>m</mi><msub><mi>x</mi><mi>i</mi></msub><mo>+</mo><mi>c</mi><mo stretchy="false">)</mo><mo>∗</mo><mo stretchy="false">(</mo><mi>m</mi><msub><mi>x</mi><mi>j</mi></msub><mo>+</mo><mi>c</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\sum(mx_i+c)*(mx_j+c)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">c</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">c</span><span class="mclose">)</span></span></span></span></span><br>a = 0.61x - 32.2 = 0.61(x - 52.7)</p>
+            <p>Actual attention = softmax(0.61(x - 52.7)). 0.61 acts as temperature.  52.7 is near the data center.</p>
+            </section>
+
+             <section><h3>Regressed features of queries</h3><iframe src="/home/kyrylo/Downloads/reveal.js-master/plots_html/max_q_lin_reg.html" alt="Max Position Embeddings" height="400" width="800"></iframe></section>
+ <section><h3>Regressed features of keys</h3><iframe src="/home/kyrylo/Downloads/reveal.js-master/plots_html/max_k_lin_reg.html" alt="Max Position Embeddings" height="400" width="800"></iframe></section>
+
+
+
+            <section><ul><li><strong>Regressed Attention Scores:</strong> Similar to original, original was less smooth.</li></ul>
+                </strong>
+                <iframe src="plots_html/max_lin_reg_attn_scores.html" alt="Max Position Embeddings" height="400" width="800"></iframe>
+            </section>
+            <section><ul><li><strong>OV Circuit:</strong> Copies the value at the attended position.  Accurate except for the under-trained 0-20 range.</li></ul>
+                <iframe src="plots_html/max_ov_circuit.html" alt="Max Position Embeddings" height="400" width="800"></iframe></section>
+            <section><ul><li><strong>Copying Robustness:</strong>  Tolerates 20-30% noise, indicating redundancy.</li></ul><iframe src="plots_html/max_robustness.html" height="400" width="800" ></iframe></section>
+            <section><ul><li><strong>Final Max Algorithm:</strong><ul>
+                
+                
+                <li><strong>QK Circuit:</strong> Converts inputs to numbers for attention calculation (y = mx + c).</li><li><strong>OV Circuit:</strong> Converts attended value to output token.</li></ul></li></ul></section>
+
+
+           <section><h3>Median Transformer</h3><ul><li><strong>Loss Plots:</strong></li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2024.png" alt="Median Loss"></section>
+            <section><ul><li><strong>Interpretation:</strong>  Difficult to interpret.</li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2025.png" alt="Median Interpretation"></section>
+             <section><h3>Features vs Input</h3><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2026.png" alt="Median Interpretation"></section>
+
+            <!-- <section><ul><li><strong>OV Circuit:</strong>  Still robust.</li></ul></section> -->
+
+
+
+
+
+            <section><h3>Sort Transformer</h3><ul><li><strong>Loss curves:</strong> Even here generalization happens before grokking.</li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2027.png"  alt="Sort Loss"></section>
+            <section><h3>Position Embedding Analysis (Sort)</h3>
+                <img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2028.png" height="600" width="600" alt="Sort Position Embeddings"><ul><li>Position embeddings similar for first five positions, demonstrating positional invariance.</li></ul></section>
+            <section><h3>Activations across Permutations (Sort)</h3><ul><li>Neuron activations invariant to input permutations.</li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2029.png" alt="Sort Activations"></section>
+            <section><h3>Attention Plots (Sort)</h3>
+                <iframe src="plots_html/sort_attn.html" alt="Max Position Embeddings" height="400" width="800"></iframe><ul><li>Heads consistently attend to the maximum element's position.</li></ul></section>
+            <section><h3>Effect of Current Number (Sort)</h3><p>CLS token attends to inputs and 0, not previous tokens.  Prediction is a function of input and current value.  Model seems to predict the correct number for the position, suggesting positional embeddings are crucial.</p></section>
+            <section><h3>Q-K Analysis (Sort)</h3><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2031.png" alt="Sort Q-K"><ul><li>Attention score variations are more complex than straight lines, possibly polynomial. Further analysis needed.</li></ul></section>
+
+
+            <!-- <section><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2032.png" alt="Sort Q-K 2"></section> -->
+            <section><h3>Pattern of attention scores</h3><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2033.png" alt="Sort Q-K 3"></section>
+            <!-- <section><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2034.png" alt="Sort Q-K 4"></section> -->
+            <!-- <section><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2035.png" alt="Sort Q-K 5"></section> -->
+            <!-- <section><p>The graphs above show varying positions of input number 2. No clear patterns observed yet.</p></section> -->
+            <section><ul><li><strong>OV Robustness (Sort):</strong>  Tolerates 30-40% noise.</li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2036.png" alt="Sort OV Robustness"></section>
+
+            <section><h3>Our Conclusions</h3>
+                <ul><li>Interpretted max transformer.</li>
+                <li>Formulation of problem is important: Sorting network predicts median better than network trained for it.</li>
+                <li>Model learns its rank in vocabulary of numbers.</li>
+                <li>Model's output to biggest number, is indepenent of its predction to let's say smallest number.</li>
+                </ul></section>
+            <section><h2>References</h2><p>[1] Power et al. (2022). Grokking. [2] Nanda et al. (2023). Progress Measures. [3] Charton (2023). Learning GCD. [4] Gromov (2023). Modular Arithmetic. [5] Palumbo et al. (2024). 2-SAT Solver. [6] Millidge (2022). Grokking 'grokking'. [7] Charton (2022). Linear Algebra. [8] Chughtai et al. (2023). Universality. [9] Nanda (2022). 200 COP in MI.</p></section>
+
+
+        </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/math/math.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+			width: 800,
+			heigh: 800,
+			backgroundTransition: 'zoom',
+            plugins: [ RevealZoom, RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX ],
+            mathjax3: { config: 'TeX-AMS_HTML-full' }
+        });
+    </script>
+</body>
+</html>
