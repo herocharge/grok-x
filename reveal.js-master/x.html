@@ -147,9 +147,9 @@
                 <img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2028.png" height="600" width="600" alt="Sort Position Embeddings"><ul><li>Position embeddings similar for first five positions, demonstrating positional invariance.</li></ul></section>
             <section><h3>Activations across Permutations (Sort)</h3><ul><li>Neuron activations invariant to input permutations.</li></ul><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2029.png" alt="Sort Activations"></section>
             <section><h3>Attention Plots (Sort)</h3>
-                <iframe src="plots_html/sort_attn.html" alt="Max Position Embeddings" height="400" width="800"></iframe><ul><li>Heads consistently attend to the maximum element's position.</li></ul></section>
+                <iframe src="plots_html/sort_attn_perms.html" alt="Max Position Embeddings" height="400" width="800"></iframe><ul><li>Heads consistently attend to the maximum element's position.</li></ul></section>
             <section><h3>Effect of Current Number (Sort)</h3><p>CLS token attends to inputs and 0, not previous tokens.  Prediction is a function of input and current value.  Model seems to predict the correct number for the position, suggesting positional embeddings are crucial.</p></section>
-            <section><h3>Q-K Analysis (Sort)</h3><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2031.png" alt="Sort Q-K"><ul><li>Attention score variations are more complex than straight lines, possibly polynomial. Further analysis needed.</li></ul></section>
+            <section><h3>Q-K Analysis (Sort)</h3><iframe src="plots_html/sort_attn.html" alt="Max Position Embeddings" height="400" width="800"></iframe><ul><li>Attention score variations are more complex than straight lines, possibly polynomial. Further analysis needed.</li></ul></section>
 
 
             <!-- <section><img src="Circuit%20engineering%201441482992a78082989bf4ab45a8a0f9/image%2032.png" alt="Sort Q-K 2"></section> -->
